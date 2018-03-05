@@ -15,7 +15,7 @@ function forEach(array, callback, scope) {
 
 var searchData = {};
 searchData.server = "COMPETITIVO (LOBBY)";
-searchData.period  = "2018-02-01";
+searchData.period  = "2018-03-01";
 var searchData = JSON.stringify(searchData);
 
 addToUsers( document.querySelectorAll('a[href^="https://gamersclub.com.br/jogador/"]') );
@@ -25,15 +25,21 @@ function addToUsers(userCards) {
   forEach(userCards, (userCard) => {
     let playerId = userCard.href.replace('https://gamersclub.com.br/jogador/', '')
 
-    var request = new XMLHttpRequest();
-    request.open('POST', '/api/statistics/'+playerId+'/search/'+playerId+'/pt-br', true);
-    request.onload = function() {
-      if (request.status >= 200 && request.status < 400) {
-        var data = JSON.parse(request.responseText);
-        userCard.setAttribute('title', 'KDR: '+data.kd_ratio);
-      }
-    };
-    request.send(searchData);
+    userCard.setAttribute('title', 'carregando kdr')
+    userCard.addEventListener('mouseover', function(e) {
+      var request = new XMLHttpRequest();
+      request.open('POST', '/api/statistics/'+playerId+'/search/'+playerId+'/pt-br', true);
+      request.onload = function() {
+        if (request.status >= 200 && request.status < 400) {
+          var data = JSON.parse(request.responseText);
+          var statsContent = 'KDR: '+data.kd_ratio;
+          userCard.setAttribute('title', statsContent);
+          userCard.dataset.tipText = document.getElementById('tooltip-span').innerHTML = statsContent;
+          userCard.dispatchEvent(new MouseEvent('mousemove'));
+        }
+      };
+      request.send(searchData);
+    })
   });
 }
 
